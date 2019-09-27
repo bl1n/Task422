@@ -4,30 +4,29 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 public class CustomView extends View {
 
-    public static final int STANDART_CIRCLE_COLOR = Color.BLACK;
+    public static final int CIRCLE_COLOR = Color.BLACK;
 
     private Paint mMainTextPaint;
+    private Paint mCutterPaint;
 
 
     private float mMainRadius;
     private float mSecondaryRadius;
 
 
-
-
-
-
     public CustomView(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public CustomView(Context context, @Nullable AttributeSet attrs) {
@@ -38,19 +37,23 @@ public class CustomView extends View {
     private void init(Context context, AttributeSet attrs) {
         mMainTextPaint = new Paint();
         mMainTextPaint.setStyle(Paint.Style.STROKE);
-        mMainTextPaint.setColor(getResources().getColor(R.color.colorPrimary));
+        mMainTextPaint.setColor(CIRCLE_COLOR);
         mMainTextPaint.setTextSize(getResources().getDimensionPixelSize(R.dimen.large_text));
         float width = mMainTextPaint.measureText("100");
-        mMainTextPaint.setStrokeWidth(width/10);
-    }
+        mMainTextPaint.setStrokeWidth(width / 10);
 
+        mCutterPaint = new Paint();
+        mCutterPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+
+    }
 
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         mMainRadius = mMainTextPaint.measureText("100");
-        mSecondaryRadius = mMainRadius* 1.2f;
+        mSecondaryRadius = mMainRadius * 1.2f;
 
         int desireRadius = (int) (mMainRadius * 3f);
         int measuredWidth = resolveSize(desireRadius, widthMeasureSpec);
@@ -64,12 +67,12 @@ public class CustomView extends View {
         int cx = getWidth() / 2;
         int cy = getHeight() / 2;
 
-        canvas.drawCircle(cx,cy,mSecondaryRadius,mMainTextPaint);
+        canvas.drawCircle(cx, cy, mSecondaryRadius, mMainTextPaint);
 
-//        canvas.drawCircle(cx,cy,mMainRadius,mMainTextPaint);
+        canvas.drawCircle(cx,cy,mMainRadius,mCutterPaint);
     }
 
-    private class Sector{
+    private class Sector {
         private float mValue;
         private Paint mPaint;
 
@@ -83,7 +86,7 @@ public class CustomView extends View {
             mPaint.setColor(color);
         }
 
-        private float draw(Canvas canvas, RectF bounds, float startAngle){
+        private float draw(Canvas canvas, RectF bounds, float startAngle) {
             canvas.drawArc(bounds, startAngle, mAngle, true, mPaint);
             return startAngle + mAngle;
         }
