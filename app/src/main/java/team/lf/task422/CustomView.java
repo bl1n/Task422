@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
@@ -18,7 +19,10 @@ public class CustomView extends View {
     private static final String TAG = "CustomView";
 
     private Paint mMainRadiusPaint;
+    private Paint mMainTextPaint;
+    private Paint mSecondaryTextPaint;
     private Paint mWhiteArcPaint;
+    private Paint mFilledRadiusPaint;
 
 
     private float mMainRadius;
@@ -26,12 +30,14 @@ public class CustomView extends View {
     private float mInnerLongStrokesRadius;
     private float mOuterLongStrokesRadius;
     private float mInnerShortStrokesRadius;
-    private float mOutterShotStrokesRadius;
+    private float mOuterShotStrokesRadius;
 
 
     private RectF mStandardBounds;
     private RectF mTotalBounds;
     private RectF mInnerOval;
+
+    private Rect mMainTextBounds;
 
     private int mColorMain;
     private int mColorSecondary;
@@ -40,7 +46,8 @@ public class CustomView extends View {
     private List<Stroke> mLongStrokes;
     private List<Stroke> mShortStrokes;
 
-    private float mAngleSum = 0f;
+    private float mSweepAngle;
+    private int mPercents;
 
 
     public CustomView(Context context) {
@@ -60,10 +67,14 @@ public class CustomView extends View {
         mColorSecondary = mainTypedArray.getColor(R.styleable.CustomView_colorSecondary, Color.WHITE);
         mColorBackground = mainTypedArray.getColor(R.styleable.CustomView_colorBackground, Color.WHITE);
 
+
+        mPercents = mainTypedArray.getInt(R.styleable.CustomView_count, 100);
+        mSweepAngle = (270f * mPercents) / 100;
+
+
         mMainRadiusPaint = new Paint();
         mMainRadiusPaint.setColor(mColorMain);
         mMainRadiusPaint.setStyle(Paint.Style.STROKE);
-        mMainRadiusPaint.setTextSize(getResources().getDimensionPixelSize(R.dimen.large_text));
         mMainRadiusPaint.setAntiAlias(true);
         mMainRadiusPaint.setStrokeWidth(5f);
 
@@ -72,44 +83,43 @@ public class CustomView extends View {
         mWhiteArcPaint.setStyle(Paint.Style.FILL);
         mWhiteArcPaint.setAntiAlias(true);
 
+        mFilledRadiusPaint = new Paint();
+        mFilledRadiusPaint.setColor(Color.RED);
+        mFilledRadiusPaint.setStyle(Paint.Style.FILL);
+        mFilledRadiusPaint.setAntiAlias(true);
+
+        mMainTextPaint = new Paint();
+        mMainTextPaint.setColor(mColorMain);
+        mMainTextPaint.setStyle(Paint.Style.STROKE);
+        mMainTextPaint.setAntiAlias(true);
+        mMainTextPaint.setTextSize(getResources().getDimensionPixelSize(R.dimen.large_text));
+
+        mSecondaryTextPaint = new Paint();
+        mSecondaryTextPaint.setTextSize(getResources().getDimensionPixelSize(R.dimen.small_text));
+        mSecondaryTextPaint.setAntiAlias(true);
+        mSecondaryTextPaint.setAlpha(50);
+        mSecondaryTextPaint.setColor(mColorMain);
+        mSecondaryTextPaint.setStyle(Paint.Style.STROKE);
+
+
 
         mStandardBounds = new RectF();
         mTotalBounds = new RectF();
         mInnerOval = new RectF();
 
+        mMainTextBounds = new Rect();
+
         mLongStrokes = new ArrayList<>();
         mShortStrokes = new ArrayList<>();
 
-        for(int i = 0; i< 8; i++){
+        for (int i = 0; i < 8; i++) {
             mLongStrokes.add(new Stroke());
         }
 
-        for(int i=0; i<40; i++){
+        for (int i = 0; i < 40; i++) {
             mShortStrokes.add(new Stroke());
         }
 
-
-    }
-
-    private List<Sector> sectorsFactory(int count, int total, float strokeSize) {
-        List<Sector> sectors = new ArrayList<>(total);
-        if (count == total || count > total) {
-            sectors.add(new Sector(1f, mColorMain));
-            return sectors;
-        } else if (count == 0) {
-            sectors.add(new Sector(1f, mColorSecondary));
-            return sectors;
-        } else {
-            for (int i = 0; i < count; i++) {
-                sectors.add(new Sector(1f, mColorMain));
-                sectors.add(new Sector(strokeSize, mColorBackground));
-            }
-            for (int i = 0; i < (total - count); i++) {
-                sectors.add(new Sector(1f, mColorSecondary));
-                sectors.add(new Sector(strokeSize, mColorBackground));
-            }
-            return sectors;
-        }
 
     }
 
@@ -117,19 +127,22 @@ public class CustomView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        mMainRadius = mMainRadiusPaint.measureText("10");
+        mMainRadius = mMainTextPaint.measureText("100");
+        mMainTextPaint.getTextBounds(String.valueOf(mPercents),0,1, mMainTextBounds);
         mInnerLongStrokesRadius = mMainRadius * 1.1f;
         mOuterLongStrokesRadius = mMainRadius * 1.25f;
         mInnerShortStrokesRadius = mMainRadius * 1.15f;
-        mOutterShotStrokesRadius = mMainRadius*1.2f;
-        int desiredDiameter = (int) (mMainRadius * 1f);
+        mOuterShotStrokesRadius = mMainRadius * 1.2f;
+
+        int desiredDiameter = (int) (mMainRadius);
         int measuredWidth = resolveSize(desiredDiameter, widthMeasureSpec);
         int measuredHeight = resolveSize(desiredDiameter, heightMeasureSpec);
+
         mTotalBounds.set(0, 0, measuredWidth, measuredHeight);
         mStandardBounds.set(mTotalBounds);
-        mStandardBounds.inset(measuredWidth * 0.22f, measuredHeight * 0.22f);
-        mInnerOval.set(mTotalBounds);
-        mInnerOval.inset(measuredWidth * 0.05f, measuredHeight * 0.05f);
+        mStandardBounds.inset(measuredWidth * 0.175f, measuredHeight * 0.175f);
+        mInnerOval.set(mStandardBounds);
+        mInnerOval.inset(measuredWidth * 0.015f, measuredHeight * 0.015f);
         setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
@@ -154,59 +167,37 @@ public class CustomView extends View {
         canvas.save();
         for (Stroke s : mShortStrokes) {
             canvas.rotate(-9f, cx, cy);
-            s.draw(cx, cy, mInnerShortStrokesRadius, mOutterShotStrokesRadius, canvas, mMainRadiusPaint);
+            s.draw(cx, cy, mInnerShortStrokesRadius, mOuterShotStrokesRadius, canvas, mMainRadiusPaint);
         }
         canvas.restore();
 
+        //cut
         canvas.save();
-        canvas.rotate(45f, cx,cy);
-        canvas.drawArc(mTotalBounds,1f,88f,true,mWhiteArcPaint);
+        canvas.rotate(45f, cx, cy);
+        canvas.drawArc(mTotalBounds, 1f, 89f, true, mWhiteArcPaint);
         canvas.restore();
 
+        //fill progress
+        canvas.save();
+        canvas.rotate(135f, cx, cy);
+        canvas.drawArc(mStandardBounds, 0f, mSweepAngle, true, mFilledRadiusPaint);
+        canvas.drawOval(mInnerOval, mWhiteArcPaint);
+        canvas.drawCircle(cx + mMainRadius, cy, 10f, mFilledRadiusPaint);
+        canvas.rotate(mSweepAngle, cx, cy);
+        canvas.drawCircle(cx + mMainRadius, cy, 10f, mFilledRadiusPaint);
+        canvas.restore();
 
-
-
-
+        //draw text
+        canvas.drawText(String.valueOf(mPercents), cx-mMainTextPaint.measureText(String.valueOf(mPercents))/2, cy + mMainTextBounds.height()/2, mMainTextPaint);
+        canvas.drawText("%", cx-mSecondaryTextPaint.measureText("%")/2, cy + mMainTextBounds.height(), mSecondaryTextPaint);
     }
 
 
     private static class Stroke {
-
-        public Stroke() {
+        Stroke() {
         }
-
         private void draw(int cx, int cy, float innerRadius, float outerRadius, Canvas canvas, Paint paint) {
-            canvas.drawLine(cx + innerRadius, cy, cx +outerRadius, cy, paint);
-        }
-
-    }
-
-    private static class Sector {
-        private float mValue;
-        private Paint mPaint;
-
-        private float mAngle;
-        private float mPercent;
-        private float mStartAngle;
-        private float mEndAngle;
-
-        private Sector(float value, int color) {
-            mValue = value;
-            mPaint = new Paint();
-            mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setAntiAlias(true);
-            mPaint.setColor(color);
-        }
-
-        private float draw(Canvas canvas, RectF bounds, float startAngle) {
-            canvas.drawArc(bounds, startAngle, mAngle, true, mPaint);
-            return startAngle + mAngle;
-        }
-
-
-        private void calculate(float valueSum) {
-            mAngle = mValue / valueSum * 270f;
-            mPercent = mValue / valueSum * 100f;
+            canvas.drawLine(cx + innerRadius, cy, cx + outerRadius, cy, paint);
         }
     }
 }
