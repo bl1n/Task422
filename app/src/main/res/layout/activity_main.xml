@@ -10,7 +10,7 @@
     <team.lf.task422.CustomView
         android:layout_width="350dp"
         android:layout_height="350dp"
-        app:count="99"
+        app:count="77"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
