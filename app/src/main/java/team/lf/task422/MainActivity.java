@@ -16,7 +16,6 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
     private CustomView mCustomView;
-    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +26,9 @@ public class MainActivity extends AppCompatActivity {
         ObjectAnimator progressAnimator = ObjectAnimator.ofInt(mCustomView, "count", 0, 100);
         progressAnimator.setDuration(5000);
         progressAnimator.setInterpolator(new LinearInterpolator());
-        ValueAnimator colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), Color.GREEN, Color.RED);
+        ValueAnimator colorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), mCustomView.getFilledLineColor(), Color.RED);
         colorAnimator.setDuration(5000);
-        colorAnimator.addUpdateListener(animation -> {
-            mCustomView.setColorFilledLine((Integer) animation.getAnimatedValue());
-        });
+        colorAnimator.addUpdateListener(animation -> mCustomView.setColorFilledLine((Integer) animation.getAnimatedValue()));
         AnimatorSet set = new AnimatorSet();
         set.playTogether(progressAnimator, colorAnimator);
         View.OnClickListener onClickListener = v -> set.start();

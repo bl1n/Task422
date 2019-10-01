@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CustomView extends View {
-    private static final String TAG = "CustomView";
 
     private Paint mMainRadiusPaint;
     private Paint mMainTextPaint;
@@ -60,6 +59,10 @@ public class CustomView extends View {
         mFilledLineColor = filledLineColor;
         mFilledRadiusPaint.setColor(mFilledLineColor);
         invalidate();
+    }
+
+    public int getFilledLineColor() {
+        return mFilledLineColor;
     }
 
     public CustomView(Context context) {

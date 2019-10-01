@@ -11,7 +11,7 @@
         android:id="@+id/progressbar"
         android:layout_width="350dp"
         android:layout_height="350dp"
-        app:colorFilledLine="@color/colorPrimary"
+        app:colorFilledLine="@android:color/holo_green_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -20,7 +20,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Click"
+        android:text="@string/click"
         android:id="@+id/btn"
 
 
