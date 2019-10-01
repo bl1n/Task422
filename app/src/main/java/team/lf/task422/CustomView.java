@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -40,7 +41,7 @@ public class CustomView extends View {
     private Rect mMainTextBounds;
 
     private int mColorMain;
-    private int mColorSecondary;
+    private int mFilledLineColor;
     private int mColorBackground;
 
     private List<Stroke> mLongStrokes;
@@ -52,6 +53,12 @@ public class CustomView extends View {
     public void setCount(int count) {
         mCount = count;
         mSweepAngle = (270f * mCount) / 100;
+        invalidate();
+    }
+
+    public void setColorFilledLine(int filledLineColor) {
+        mFilledLineColor = filledLineColor;
+        mFilledRadiusPaint.setColor(mFilledLineColor);
         invalidate();
     }
 
@@ -69,12 +76,8 @@ public class CustomView extends View {
         TypedArray mainTypedArray = context.getTheme()
                 .obtainStyledAttributes(attrs, R.styleable.CustomView, 0, 0);
         mColorMain = mainTypedArray.getColor(R.styleable.CustomView_colorMain, Color.BLACK);
-        mColorSecondary = mainTypedArray.getColor(R.styleable.CustomView_colorSecondary, Color.WHITE);
+        mFilledLineColor = mainTypedArray.getColor(R.styleable.CustomView_colorFilledLine, Color.BLUE);
         mColorBackground = mainTypedArray.getColor(R.styleable.CustomView_colorBackground, Color.WHITE);
-
-
-//        mCount = mainTypedArray.getInt(R.styleable.CustomView_count, 100);
-
 
         mMainRadiusPaint = new Paint();
         mMainRadiusPaint.setColor(mColorMain);
@@ -88,7 +91,7 @@ public class CustomView extends View {
         mWhiteArcPaint.setAntiAlias(true);
 
         mFilledRadiusPaint = new Paint();
-        mFilledRadiusPaint.setColor(Color.RED);
+        mFilledRadiusPaint.setColor(mFilledLineColor);
         mFilledRadiusPaint.setStyle(Paint.Style.FILL);
         mFilledRadiusPaint.setAntiAlias(true);
 
@@ -105,8 +108,6 @@ public class CustomView extends View {
         mSecondaryTextPaint.setColor(mColorMain);
         mSecondaryTextPaint.setStyle(Paint.Style.STROKE);
 
-
-
         mStandardBounds = new RectF();
         mTotalBounds = new RectF();
         mInnerOval = new RectF();
@@ -119,12 +120,9 @@ public class CustomView extends View {
         for (int i = 0; i < 8; i++) {
             mLongStrokes.add(new Stroke());
         }
-
         for (int i = 0; i < 40; i++) {
             mShortStrokes.add(new Stroke());
         }
-
-
     }
 
 
