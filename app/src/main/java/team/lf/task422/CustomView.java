@@ -47,8 +47,13 @@ public class CustomView extends View {
     private List<Stroke> mShortStrokes;
 
     private float mSweepAngle;
-    private int mPercents;
+    private int mCount;
 
+    public void setCount(int count) {
+        mCount = count;
+        mSweepAngle = (270f * mCount) / 100;
+        invalidate();
+    }
 
     public CustomView(Context context) {
         super(context);
@@ -68,8 +73,7 @@ public class CustomView extends View {
         mColorBackground = mainTypedArray.getColor(R.styleable.CustomView_colorBackground, Color.WHITE);
 
 
-        mPercents = mainTypedArray.getInt(R.styleable.CustomView_count, 100);
-        mSweepAngle = (270f * mPercents) / 100;
+//        mCount = mainTypedArray.getInt(R.styleable.CustomView_count, 100);
 
 
         mMainRadiusPaint = new Paint();
@@ -128,7 +132,7 @@ public class CustomView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
         mMainRadius = mMainTextPaint.measureText("100");
-        mMainTextPaint.getTextBounds(String.valueOf(mPercents),0,1, mMainTextBounds);
+        mMainTextPaint.getTextBounds(String.valueOf(mCount),0,1, mMainTextBounds);
         mInnerLongStrokesRadius = mMainRadius * 1.1f;
         mOuterLongStrokesRadius = mMainRadius * 1.25f;
         mInnerShortStrokesRadius = mMainRadius * 1.15f;
@@ -188,7 +192,7 @@ public class CustomView extends View {
         canvas.restore();
 
         //draw text
-        canvas.drawText(String.valueOf(mPercents), cx-mMainTextPaint.measureText(String.valueOf(mPercents))/2, cy + mMainTextBounds.height()/2, mMainTextPaint);
+        canvas.drawText(String.valueOf(mCount), cx-mMainTextPaint.measureText(String.valueOf(mCount))/2, cy + mMainTextBounds.height()/2, mMainTextPaint);
         canvas.drawText("%", cx-mSecondaryTextPaint.measureText("%")/2, cy + mMainTextBounds.height(), mSecondaryTextPaint);
     }
 
